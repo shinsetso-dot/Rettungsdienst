@@ -3362,7 +3362,7 @@ function RettungsdienstDemoInner({ session, onLogout }) {
   // garantiert überall dort, wo eine Mail-App eingerichtet ist.
   //
   // ADRESSE HIER EINTRAGEN:
-  const FEEDBACK_EMAIL = "DEINE-ADRESSE@beispiel.de";
+  const FEEDBACK_EMAIL = "shinsetso@googlemail.com";
 
   async function feedbackSenden() {
     setFeedbackFehler(null);
