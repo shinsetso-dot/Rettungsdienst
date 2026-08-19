@@ -35,7 +35,23 @@ import {
 // angezeigt, damit Nutzer erkennen können, ob sie auf dem neuesten
 // Stand sind.
 // ═══════════════════════════════════════════════════════════════
-const APP_VERSION = "0.6";
+const APP_VERSION = "0.8";
+
+// ═══════════════════════════════════════════════════════════════
+// CHANGELOG — bei jeder Version hier einen neuen Eintrag ergänzen.
+// Wird als Pflicht-Popup nach Updates gezeigt (einmalig pro Version).
+// ═══════════════════════════════════════════════════════════════
+const CHANGELOG = {
+  "0.8": [
+    "NEWS2- und qSOFA-Score als eigene Referenzkarten ergänzt, bei der Sepsis-Karte (K18) direkt verlinkt.",
+    "PsychKHG Hessen (Unterbringung bei Selbst-/Fremdgefährdung) als Rechts-Referenzkarte mit Quellenangabe ergänzt.",
+    "MANV/mSTART sind jetzt aufklappbar statt permanent geöffnet — wie die Algorithmus-Karten.",
+    "Einsatz-Schnellauswahl erweitert (Trauma, qSOFA, PsychKHG, MANV ergänzt) und alphabetisch sortiert.",
+    "Kopfbereich übersichtlicher: Einstellungen jetzt über ein Menü statt vieler Einzel-Symbole.",
+    "App-Logo im Kopfbereich an das echte Homescreen-Icon angeglichen.",
+    "Update-Hinweis (dieses Fenster) neu eingeführt — erscheint künftig einmalig bei jeder neuen Version.",
+  ],
+};
 
 function AuthForm({ onAuthenticated }) {
   const [modus, setModus] = useState("login");
@@ -102,21 +118,24 @@ function AuthForm({ onAuthenticated }) {
 // algoId verweist auf die passende Karte in ALGORITHMEN; "PAEDIATRISCH" öffnet
 // stattdessen die Pädiatrie-Übersicht; null = kein automatisches Öffnen.
 const EINSATZSTICHWORTE = [
-  { label: "Atemnot / COPD", algoId: "atemnot-erwachsene", farbe: "#60A5FA" },
   { label: "ACS / Brustschmerz", algoId: "acs", farbe: "#F87171" },
-  { label: "Schlaganfall", algoId: "schlaganfall", farbe: "#A78BFA" },
-  { label: "Krampfanfall", algoId: "krampfanfall", farbe: "#FBBF24" },
-  { label: "Hypoglykämie", algoId: "hypoglykaemie-erw", farbe: "#34D399" },
   { label: "Anaphylaxie", algoId: "anaphylaxie", farbe: "#FF6A3D" },
-  { label: "Sepsis / Infektion", algoId: "sepsis", farbe: "#F87171" },
+  { label: "Atemnot / COPD", algoId: "atemnot-erwachsene", farbe: "#60A5FA" },
   { label: "Bradykardie", algoId: "bradykardie", farbe: "#60A5FA" },
   { label: "Hypertensiver Notfall", algoId: "hypertensiv", farbe: "#FBBF24" },
-  { label: "Vergiftung (CO)", algoId: "co-vergiftung-ohne-spco", farbe: "#94A3B8" },
+  { label: "Hypoglykämie", algoId: "hypoglykaemie-erw", farbe: "#34D399" },
+  { label: "Krampfanfall", algoId: "krampfanfall", farbe: "#FBBF24" },
+  { label: "MANV / Vorsichtung", algoId: "MANV_EXTERN", farbe: "#EF4444" },
   { label: "Opioid-Notfall", algoId: "opioid-komplikation", farbe: "#F472B6" },
-  { label: "Schmerzen", algoId: "schmerz-uebersicht", farbe: "#FBBF24" },
-  { label: "Übelkeit", algoId: "starke-uebelkeit", farbe: "#4ADE80" },
   { label: "Pädiatrisch", algoId: "PAEDIATRISCH", farbe: "#34D399" },
+  { label: "PsychKHG / Unterbringung", algoId: "PSYCHKHG_EXTERN", farbe: "#FBBF24" },
+  { label: "qSOFA / Sepsis-Screening", algoId: "QSOFA_EXTERN", farbe: "#F87171" },
+  { label: "Schlaganfall", algoId: "schlaganfall", farbe: "#A78BFA" },
+  { label: "Schmerzen", algoId: "schmerz-uebersicht", farbe: "#FBBF24" },
+  { label: "Sepsis / Infektion", algoId: "sepsis", farbe: "#F87171" },
   { label: "Trauma", algoId: "TRAUMA_EXTERN", farbe: "#8B5CF6" },
+  { label: "Übelkeit", algoId: "starke-uebelkeit", farbe: "#4ADE80" },
+  { label: "Vergiftung (CO)", algoId: "co-vergiftung-ohne-spco", farbe: "#94A3B8" },
 ];
 
 const MEDIKAMENTE = [
@@ -1385,6 +1404,90 @@ const TRAUMA_REFERENZ = {
   ],
 };
 
+// ═══════════════════════════════════════════════════════════════
+// qSOFA — externe, standardisierte Screening-Quelle (Sepsis-3-Konsensus).
+// Ergänzt die K18-Sepsis-Karte, ersetzt sie nicht.
+// ═══════════════════════════════════════════════════════════════
+const QSOFA_REFERENZ = {
+  titel: "qSOFA-Screening-Score (Sepsis)",
+  quelleName: "quick Sequential Organ Failure Assessment (qSOFA)",
+  quelleDetail: "Nach Seymour et al., University of Pittsburgh — Sepsis-3-Konsensusdefinition",
+  farbe: "#F87171",
+  bildUrl: "images/referenz/qsofa.webp",
+  tabelle: [
+    { label: "Bewusstseinsveränderung", wert: "GCS < 15", punkte: "1 Punkt" },
+    { label: "Tachypnoe", wert: "Atemfrequenz ≥ 22/min", punkte: "1 Punkt" },
+    { label: "Hypotonie", wert: "RRsys ≤ 100 mmHg", punkte: "1 Punkt" },
+  ],
+  punkte: [
+    "≥ 2 von 3 Kriterien erfüllt: erhöhtes Risiko für einen schweren Verlauf bei Sepsisverdacht — engmaschige Überwachung, ggf. NA-Nachforderung, zügiger Transport in geeignete Zielklinik erwägen.",
+    "Der qSOFA ist ein Screening-Werkzeug, keine Diagnose — ersetzt nicht die klinische Gesamteinschätzung nach dem Basisalgorithmus/K18.",
+  ],
+};
+
+// ═══════════════════════════════════════════════════════════════
+// NEWS2 — externe, standardisierte Frühwarn-Score-Quelle (Royal College
+// of Physicians, UK). Ergänzt K18/allgemeine Verlaufsbeurteilung.
+// ═══════════════════════════════════════════════════════════════
+const NEWS2_REFERENZ = {
+  titel: "NEWS2-Score (National Early Warning Score 2)",
+  quelleName: "National Early Warning Score 2 (NEWS2)",
+  quelleDetail: "Royal College of Physicians (UK) — standardisiertes Frühwarnsystem für klinische Verschlechterung",
+  farbe: "#60A5FA",
+  bildUrl: "images/referenz/news2.webp",
+  bildUrl2: "images/referenz/news2-risiko.webp",
+  tabelle: [
+    { label: "Atemfrequenz (/min)", wert: "≤8: 3 · 9–11: 1 · 12–20: 0 · 21–24: 2 · ≥25: 3" },
+    { label: "SpO2 Standardskala (%)", wert: "≤91: 3 · 92–93: 2 · 94–95: 1 · ≥96: 0" },
+    { label: "SpO2 bei hyperkapnischer Insuffizienz (%)", wert: "≤83: 3 · 84–85: 2 · 86–87: 1 · 88–92: 0 · 93–96 mit O2: 1–2 · ≥97 mit O2: 3" },
+    { label: "O2-Gabe notwendig", wert: "Ja: 2 · Nein: 0" },
+    { label: "RRsys (mmHg)", wert: "≤90: 3 · 91–100: 2 · 101–110: 1 · 111–219: 0 · ≥220: 3" },
+    { label: "Herzfrequenz (/min)", wert: "≤40: 3 · 41–50: 1 · 51–90: 0 · 91–110: 1 · 111–130: 2 · ≥131: 3" },
+    { label: "Vigilanz", wert: "Wach (A): 0 · Verwirrt/Reaktion auf Stimme/Schmerz/keine Reaktion (CVPU): 3" },
+    { label: "Temperatur (°C)", wert: "≤35.0: 3 · 35.1–36.0: 1 · 36.1–38.0: 0 · 38.1–39.0: 1 · ≥39.1: 2" },
+  ],
+  punkte: [
+    "Gesamtpunktzahl 0–4: niedriges klinisches Risiko.",
+    "„Roter Score” (3 Punkte in einem einzelnen Parameter): niedrig-mittleres Risiko, auch bei niedriger Gesamtpunktzahl beachten.",
+    "Gesamtpunktzahl 5–7: mittleres Risiko.",
+    "Gesamtpunktzahl 7 oder mehr: hohes Risiko.",
+  ],
+};
+
+// ═══════════════════════════════════════════════════════════════
+// PSYCHKHG HESSEN — Rechtsgrundlage für Unterbringung bei Selbst-/
+// Fremdgefährdung infolge psychischer Krankheit. Löste 2017 das alte
+// Freiheitsentziehungsgesetz (HFEG, 1952) ab. KEINE Rechtsberatung,
+// nur Orientierung mit Verweis auf die Originalquelle. Bei konkreten
+// Einzelfällen zählt immer der tatsächliche Gesetzestext, nicht diese
+// Zusammenfassung.
+// Quelle: Hessisches Gesetz über Hilfen bei psychischen Krankheiten
+// (Psychisch-Kranken-Hilfe-Gesetz — PsychKHG) vom 4. Mai 2017 (GVBl.
+// S. 66), zuletzt geändert 2023. Offizieller Volltext:
+// rv.hessenrecht.hessen.de
+// ═══════════════════════════════════════════════════════════════
+const PSYCHKHG_REFERENZ = {
+  titel: "PsychKHG Hessen — Unterbringung bei Selbst-/Fremdgefährdung",
+  quelleName: "Psychisch-Kranken-Hilfe-Gesetz (PsychKHG) Hessen, vom 4. Mai 2017",
+  quelleDetail: "Offizieller Volltext: rv.hessenrecht.hessen.de — löste 2017 das alte Freiheitsentziehungsgesetz (HFEG, 1952) ab",
+  farbe: "#FBBF24",
+  punkte: [
+    "§ 9 Abs. 1 PsychKHG — Voraussetzung der Unterbringung: eine Person kann untergebracht werden, wenn von ihr infolge einer psychischen Krankheit eine Gefahr für das eigene Leben oder die eigene Gesundheit (Selbstgefährdung) oder für Leben, Gesundheit oder andere bedeutende Rechtsgüter anderer (Fremdgefährdung) ausgeht.",
+    "§ 17 PsychKHG — Sofortige vorläufige Unterbringung bei Gefahr im Verzug: Polizei/Ordnungsbehörde kann die sofortige Ingewahrsamnahme anordnen und vollziehen, wenn die Voraussetzungen nach § 9 mit hoher Wahrscheinlichkeit vorliegen.",
+    "Üblicher Ablauf: Ingewahrsamnahme durch Polizei/Ordnungsbehörde → ärztliche Untersuchung/Stellungnahme → Übernahme der Verantwortung durch den Arzt → Benachrichtigung des Gesundheitsamts → Entscheidung einer Richterin/eines Richters (Betreuungsgericht) innerhalb von 24 Stunden.",
+    "§ 21 PsychKHG — Fixierungen: bedürfen bei absehbar längerer Dauer (über 30 Minuten) der richterlichen Genehmigung (Umsetzung der Vorgaben des Bundesverfassungsgerichts von 2018).",
+    "Gilt NICHT bei Selbsteinwilligung, bei bestehender rechtlicher Betreuung (dort greift das Betreuungsrecht) oder bei Unterbringung nach bundesrechtlichen Vorschriften (z. B. §§ 63, 64 StGB).",
+    "Dies ist eine Orientierungshilfe, KEINE Rechtsberatung und kein Ersatz für den tatsächlichen Gesetzestext oder Rücksprache mit dem Notarzt/der Leitstelle im Einzelfall. Vollständiger, verbindlicher Text: rv.hessenrecht.hessen.de.",
+  ],
+};
+
+const REFERENZ_KARTEN = {
+  trauma: TRAUMA_REFERENZ,
+  qsofa: QSOFA_REFERENZ,
+  news2: NEWS2_REFERENZ,
+  psychkhg: PSYCHKHG_REFERENZ,
+};
+
 const ALGORITHMEN_HESSEN = [
   {
     id: "h-k1-acs",
@@ -1699,6 +1802,7 @@ const ALGORITHMEN_HESSEN = [
     version: "V4.0",
     stand: "19.02.2025",
     bildUrl: "images/hessen/K18_sepsis.webp",
+    referenzen: ["qsofa", "news2"],
     schritte: ["Original-Hessenalgorithmus (Bild) — Diagrammdaten noch nicht digitalisiert, siehe Bild-Ansicht"],
   },
   {
@@ -2207,6 +2311,7 @@ const ALGORITHMEN = [
     version: "V1.5",
     stand: "31.01.2026",
     bildUrl: "images/da-di/K18_sepsis.webp",
+    referenzen: ["qsofa", "news2"],
     schritte: [
       "Basisalgorithmus → Patient instabil? Ja → NA alarmieren",
       "Nein → Peripher-venöser Zugang und VEL-Infusion",
@@ -3449,6 +3554,20 @@ function RettungsdienstDemoInner({ session, onLogout }) {
   // Liste selbst — Reihenfolge bleibt stabil, nichts springt.
   const [algoPinned, setAlgoPinned] = useState(false);
   const [zonePos, setZonePos] = useState(2);
+  // Regler-Update auf max. 1x pro Bildschirmbild gedrosselt — verhindert
+  // Ruckeln beim Ziehen, weil sonst bei jedem winzigen Fingerzucken (Schrittweite
+  // 0,01) sofort ein kompletter Neu-Render der gesamten Ansicht ausgelöst wird.
+  const zonePosPending = useRef(null);
+  const zonePosRaf = useRef(null);
+  function zonePosDrosseln(wert) {
+    zonePosPending.current = wert;
+    if (zonePosRaf.current == null) {
+      zonePosRaf.current = requestAnimationFrame(() => {
+        setZonePos(zonePosPending.current);
+        zonePosRaf.current = null;
+      });
+    }
+  }
   const [uebernommen, setUebernommen] = useState(false);
   const [kinderUnterTab, setKinderUnterTab] = useState("norm");
   const [stichwortDialog, setStichwortDialog] = useState(false);
@@ -3482,8 +3601,12 @@ function RettungsdienstDemoInner({ session, onLogout }) {
   });
   const [vertraulichkeitChecked, setVertraulichkeitChecked] = useState(false);
   const [impressumOffen, setImpressumOffen] = useState(false);
-  const [traumaOffen, setTraumaOffen] = useState(false);
+  // Generalisierter State für alle externen Referenzkarten (Trauma, qSOFA,
+  // NEWS2, ...) — hält den Schlüssel aus REFERENZ_KARTEN oder null.
+  const [referenzOffen, setReferenzOffen] = useState(null);
   const [zoomBild, setZoomBild] = useState(null);
+  const [manvOffenId, setManvOffenId] = useState(null);
+  const [kopfMenuOffen, setKopfMenuOffen] = useState(false);
 
   function disclaimerBestaetigen() {
     try {
@@ -3496,10 +3619,31 @@ function RettungsdienstDemoInner({ session, onLogout }) {
   function vertraulichkeitBestaetigen() {
     try {
       localStorage.setItem("rd_vertraulichkeit_ok_v1", "true");
+      // Bei Erstinstallation zählt die aktuelle Version direkt als "gesehen",
+      // damit nicht sofort danach nochmal ein Update-Popup aufploppt.
+      localStorage.setItem("rd_last_seen_version", APP_VERSION);
     } catch {
       // Speicher nicht verfügbar — Bestätigung gilt dann nur für diese Sitzung.
     }
     setVertraulichkeitOk(true);
+    setUpdateOk(true);
+  }
+  // Update-Hinweis: zeigt bei jeder neuen Version einmalig den Changelog,
+  // muss aktiv bestätigt werden (gleiches Muster wie die zwei Start-Hinweise).
+  const [updateOk, setUpdateOk] = useState(() => {
+    try {
+      return localStorage.getItem("rd_last_seen_version") === APP_VERSION;
+    } catch {
+      return true; // Speicher nicht verfügbar — App nicht blockieren.
+    }
+  });
+  function updateBestaetigen() {
+    try {
+      localStorage.setItem("rd_last_seen_version", APP_VERSION);
+    } catch {
+      // Speicher nicht verfügbar — Bestätigung gilt dann nur für diese Sitzung.
+    }
+    setUpdateOk(true);
   }
   // Persönlicher Medikamenten-Zähler ("Karriere-Gadget") — rein lokal im
   // Browser gespeichert (localStorage), keine Server-Anbindung, minimaler
@@ -3671,7 +3815,13 @@ function RettungsdienstDemoInner({ session, onLogout }) {
       setTab("kinder");
       setKinderUnterTab("norm");
     } else if (algoId === "TRAUMA_EXTERN") {
-      setTraumaOffen(true);
+      setReferenzOffen("trauma");
+    } else if (algoId === "QSOFA_EXTERN") {
+      setReferenzOffen("qsofa");
+    } else if (algoId === "PSYCHKHG_EXTERN") {
+      setReferenzOffen("psychkhg");
+    } else if (algoId === "MANV_EXTERN") {
+      setTab("manv");
     } else if (algoId) {
       setAlgoRegion("darmstadt");
       setTab("algorithmen");
@@ -3993,6 +4143,84 @@ function RettungsdienstDemoInner({ session, onLogout }) {
     );
   }
 
+  // ═══════════════════════════════════════════════════════════════
+  // DRITTER SPERRBILDSCHIRM — Update-Hinweis. Erscheint einmalig, wenn
+  // sich APP_VERSION seit dem letzten Öffnen geändert hat.
+  // ═══════════════════════════════════════════════════════════════
+  if (!updateOk) {
+    const punkte = CHANGELOG[APP_VERSION] || ["Kleinere Verbesserungen und Fehlerbehebungen."];
+    return (
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "radial-gradient(circle at 15% 0%, #17233B 0%, #0B1220 55%)",
+          padding: 20,
+          fontFamily: "'IBM Plex Sans', system-ui, sans-serif",
+        }}
+      >
+        <div
+          style={{
+            width: "100%",
+            maxWidth: 440,
+            background: "#0E1728",
+            border: "1px solid #212C42",
+            borderRadius: 18,
+            padding: 24,
+            color: "#E8ECF4",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: 44,
+              height: 44,
+              borderRadius: 12,
+              background: "#60A5FA22",
+              marginBottom: 14,
+            }}
+          >
+            <PackagePlus size={22} color="#60A5FA" />
+          </div>
+          <h1 style={{ fontSize: 18, fontWeight: 800, margin: "0 0 4px" }}>
+            App aktualisiert
+          </h1>
+          <p style={{ fontSize: 12.5, color: "var(--text-muted, #8A93A8)", margin: "0 0 16px" }}>
+            Version {APP_VERSION} — das ist neu:
+          </p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 20 }}>
+            {punkte.map((p, i) => (
+              <div key={i} style={{ display: "flex", gap: 8, fontSize: 13, lineHeight: 1.5, color: "#C7CEDB" }}>
+                <span style={{ color: "#60A5FA", fontWeight: 700, flexShrink: 0 }}>•</span>
+                <span>{p}</span>
+              </div>
+            ))}
+          </div>
+          <button
+            onClick={updateBestaetigen}
+            style={{
+              width: "100%",
+              padding: "13px 0",
+              borderRadius: 10,
+              border: "none",
+              background: "linear-gradient(135deg, #FF6A3D, #FF8F6B)",
+              color: "#FFFFFF",
+              fontSize: 14,
+              fontWeight: 700,
+              cursor: "pointer",
+            }}
+          >
+            Verstanden — weiter zur App
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       style={{
@@ -4085,9 +4313,22 @@ function RettungsdienstDemoInner({ session, onLogout }) {
                 borderRadius: 10,
                 background: "linear-gradient(135deg, #FF6A3D, #FF8F6B)",
                 boxShadow: "0 4px 14px -4px #FF6A3D88",
+                flexShrink: 0,
               }}
             >
-              <Syringe size={17} color="#FFFFFF" strokeWidth={2.4} />
+              {/* Dasselbe Motiv wie das echte Homescreen-App-Icon: Puls-Kurve + Kreuz-Akzent */}
+              <svg width="20" height="20" viewBox="0 0 100 100" fill="none">
+                <path
+                  d="M 8 58 L 26 58 L 33 43 L 41 68 L 49 33 L 57 63 L 63 50 L 70 58 L 92 58"
+                  stroke="#FFFFFF"
+                  strokeWidth="8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  fill="none"
+                />
+                <rect x="45.5" y="10" width="9" height="20" rx="2" fill="#FFFFFF" />
+                <rect x="40" y="15.5" width="20" height="9" rx="2" fill="#FFFFFF" />
+              </svg>
             </div>
             <span
               style={{
@@ -4101,80 +4342,101 @@ function RettungsdienstDemoInner({ session, onLogout }) {
               RD-Toolkit · Demo
             </span>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, position: "relative" }}>
             <button
-              onClick={() => setDarkMode((d) => !d)}
-              title={darkMode ? "Helles Design" : "Dunkles Design"}
+              onClick={() => setKopfMenuOffen((v) => !v)}
+              title="Einstellungen"
               style={{
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                width: 34,
-                height: 34,
-                borderRadius: 9,
+                width: 38,
+                height: 38,
+                borderRadius: 10,
                 border: "1px solid var(--border)",
-                background: "var(--card)",
-                color: "var(--text-muted)",
+                background: kopfMenuOffen ? "var(--card-active)" : "var(--card)",
+                color: "var(--text)",
                 cursor: "pointer",
               }}
             >
-              {darkMode ? <Sun size={16} /> : <Moon size={16} />}
+              {/* Hamburger-Menü-Symbol */}
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+              </svg>
             </button>
-            <button
-              onClick={() => setMedZaehlerDialog(true)}
-              title="Medikamenten-Zähler (persönliches Gadget)"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                width: 34,
-                height: 34,
-                borderRadius: 9,
-                border: "1px solid var(--border)",
-                background: "var(--card)",
-                color: "var(--text-muted)",
-                cursor: "pointer",
-              }}
-            >
-              <PackagePlus size={16} />
-            </button>
-            <button
-              onClick={() => setFeedbackDialog(true)}
-              title="Feedback geben"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                width: 34,
-                height: 34,
-                borderRadius: 9,
-                border: "1px solid var(--border)",
-                background: "var(--card)",
-                color: "var(--text-muted)",
-                cursor: "pointer",
-              }}
-            >
-              <MessageSquarePlus size={16} />
-            </button>
-            {onLogout && (
-              <button
-                onClick={onLogout}
-                title="Abmelden"
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  width: 34,
-                  height: 34,
-                  borderRadius: 9,
-                  border: "1px solid var(--border)",
-                  background: "var(--card)",
-                  color: "var(--text-muted)",
-                  cursor: "pointer",
-                }}
-              >
-                <LogOut size={16} />
-              </button>
+
+            {kopfMenuOffen && (
+              <>
+                {/* Unsichtbare Fläche zum Schließen bei Klick daneben */}
+                <div
+                  onClick={() => setKopfMenuOffen(false)}
+                  style={{ position: "fixed", inset: 0, zIndex: 55 }}
+                />
+                <div
+                  style={{
+                    position: "absolute",
+                    top: 44,
+                    right: 0,
+                    zIndex: 56,
+                    width: 240,
+                    background: "var(--card-active)",
+                    border: "1px solid var(--border)",
+                    borderRadius: 12,
+                    boxShadow: "0 12px 32px -8px rgba(0,0,0,0.4)",
+                    overflow: "hidden",
+                  }}
+                >
+                  <button
+                    onClick={() => { setDarkMode((d) => !d); setKopfMenuOffen(false); }}
+                    style={{
+                      display: "flex", alignItems: "center", gap: 10, width: "100%",
+                      padding: "12px 14px", background: "transparent", border: "none",
+                      borderBottom: "1px solid var(--border)", color: "var(--text)",
+                      fontSize: 13, fontWeight: 600, cursor: "pointer", textAlign: "left",
+                    }}
+                  >
+                    {darkMode ? <Sun size={16} /> : <Moon size={16} />}
+                    {darkMode ? "Helles Design" : "Dunkles Design"}
+                  </button>
+                  <button
+                    onClick={() => { setMedZaehlerDialog(true); setKopfMenuOffen(false); }}
+                    style={{
+                      display: "flex", alignItems: "center", gap: 10, width: "100%",
+                      padding: "12px 14px", background: "transparent", border: "none",
+                      borderBottom: "1px solid var(--border)", color: "var(--text)",
+                      fontSize: 13, fontWeight: 600, cursor: "pointer", textAlign: "left",
+                    }}
+                  >
+                    <PackagePlus size={16} />
+                    Medikamenten-Zähler
+                  </button>
+                  <button
+                    onClick={() => { setFeedbackDialog(true); setKopfMenuOffen(false); }}
+                    style={{
+                      display: "flex", alignItems: "center", gap: 10, width: "100%",
+                      padding: "12px 14px", background: "transparent", border: "none",
+                      borderBottom: onLogout ? "1px solid var(--border)" : "none", color: "var(--text)",
+                      fontSize: 13, fontWeight: 600, cursor: "pointer", textAlign: "left",
+                    }}
+                  >
+                    <MessageSquarePlus size={16} />
+                    Feedback geben
+                  </button>
+                  {onLogout && (
+                    <button
+                      onClick={() => { onLogout(); setKopfMenuOffen(false); }}
+                      style={{
+                        display: "flex", alignItems: "center", gap: 10, width: "100%",
+                        padding: "12px 14px", background: "transparent", border: "none",
+                        color: "var(--text)", fontSize: 13, fontWeight: 600, cursor: "pointer", textAlign: "left",
+                      }}
+                    >
+                      <LogOut size={16} />
+                      Abmelden
+                    </button>
+                  )}
+                </div>
+              </>
             )}
           </div>
         </div>
@@ -5356,7 +5618,7 @@ function RettungsdienstDemoInner({ session, onLogout }) {
                   max={PEDIATRIE_ZONEN.length - 1}
                   step={0.01}
                   value={zonePos}
-                  onChange={(e) => setZonePos(Number(e.target.value))}
+                  onChange={(e) => zonePosDrosseln(Number(e.target.value))}
                   style={{
                     position: "absolute",
                     top: 8,
@@ -6017,6 +6279,7 @@ function RettungsdienstDemoInner({ session, onLogout }) {
               return (
                 <div
                   key={a.id}
+                  data-algo-karte
                   style={{
                     background: "var(--card)",
                     border: "1px solid var(--border)",
@@ -6026,9 +6289,18 @@ function RettungsdienstDemoInner({ session, onLogout }) {
                   }}
                 >
                   <button
-                    onClick={() => {
+                    onClick={(e) => {
+                      const zielKarte = e.currentTarget.closest("[data-algo-karte]");
                       setOpenAlgo(open ? null : a.id);
                       setAlgoPinned(false);
+                      // Verhindert den optischen "Sprung", der entsteht, wenn eine andere,
+                      // weiter oben/unten offene Karte gleichzeitig zuklappt und dadurch
+                      // alles verschiebt — die angeklickte Karte bleibt im Sichtfeld stehen.
+                      if (zielKarte) {
+                        requestAnimationFrame(() => {
+                          zielKarte.scrollIntoView({ block: "nearest", behavior: "instant" });
+                        });
+                      }
                     }}
                     style={{
                       width: "100%",
@@ -6240,6 +6512,36 @@ function RettungsdienstDemoInner({ session, onLogout }) {
                           </p>
                         </div>
                       )}
+                      {a.referenzen && a.referenzen.length > 0 && (
+                        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 10 }}>
+                          {a.referenzen.map((refId) => {
+                            const ref = REFERENZ_KARTEN[refId];
+                            if (!ref) return null;
+                            return (
+                              <button
+                                key={refId}
+                                onClick={() => setReferenzOffen(refId)}
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: 6,
+                                  padding: "7px 12px",
+                                  borderRadius: 8,
+                                  border: `1px solid ${ref.farbe}`,
+                                  background: `${ref.farbe}18`,
+                                  color: ref.farbe,
+                                  fontSize: 11.5,
+                                  fontWeight: 700,
+                                  cursor: "pointer",
+                                }}
+                              >
+                                <Info size={12} />
+                                {ref.titel.split(" (")[0].split(" —")[0]}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -6269,37 +6571,62 @@ function RettungsdienstDemoInner({ session, onLogout }) {
               </p>
             </div>
 
-            {ALGORITHMEN.filter((a) => a.id === "v3a-vorsichtung-prior" || a.id === "v3b-vorsichtung-mstart").map((a) => (
+            {ALGORITHMEN.filter((a) => a.id === "v3a-vorsichtung-prior" || a.id === "v3b-vorsichtung-mstart").map((a) => {
+              const offen = manvOffenId === a.id;
+              return (
               <div
                 key={a.id}
                 style={{
                   background: "var(--card)",
                   border: "1px solid var(--border)",
                   borderRadius: 14,
-                  padding: 16,
                   boxShadow: "var(--shadow-card)",
+                  overflow: "hidden",
                 }}
               >
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-                  <span style={{ width: 8, height: 8, borderRadius: 99, background: a.farbe, flexShrink: 0 }} />
-                  <span style={{ fontSize: 15, fontWeight: 700 }}>{a.titel}</span>
-                  {a.quelle === "sop" && <Badge tone="sop" bgOverride={sopBadgeFarbe(a.titel, algoRegion)}>SOP</Badge>}
-                </div>
-                {a.stand && (
-                  <div style={{ fontSize: 10, color: "var(--text-muted)", marginLeft: 16, marginBottom: 10 }}>
-                    Bgs · Da · DaDi · GG — Stand {a.stand} ({a.version})
+                <button
+                  onClick={() => setManvOffenId(offen ? null : a.id)}
+                  style={{
+                    width: "100%",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    padding: "14px 16px",
+                    background: "transparent",
+                    border: "none",
+                    cursor: "pointer",
+                    textAlign: "left",
+                  }}
+                >
+                  <div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                      <span style={{ width: 8, height: 8, borderRadius: 99, background: a.farbe, flexShrink: 0 }} />
+                      <span style={{ fontSize: 15, fontWeight: 700 }}>{a.titel}</span>
+                      {a.quelle === "sop" && <Badge tone="sop" bgOverride={sopBadgeFarbe(a.titel, algoRegion)}>SOP</Badge>}
+                    </div>
+                    {a.stand && (
+                      <div style={{ fontSize: 10, color: "var(--text-muted)", marginLeft: 16 }}>
+                        Bgs · Da · DaDi · GG — Stand {a.stand} ({a.version})
+                      </div>
+                    )}
+                  </div>
+                  <ChevronDown size={16} style={{ transform: offen ? "rotate(180deg)" : "none", transition: "transform 0.15s", flexShrink: 0 }} />
+                </button>
+                {offen && (
+                  <div style={{ padding: "0 16px 16px" }}>
+                    {a.bildUrl && (
+                      <img
+                        src={a.bildUrl}
+                        alt={`Original-Seite: ${a.titel}`}
+                        onClick={() => setZoomBild({ src: a.bildUrl, alt: a.titel })}
+                        style={{ width: "100%", borderRadius: 10, border: "1px solid var(--border)", display: "block", cursor: "zoom-in" }}
+                      />
+                    )}
                   </div>
                 )}
-                {a.bildUrl && (
-                  <img
-                    src={a.bildUrl}
-                    alt={`Original-Seite: ${a.titel}`}
-                    onClick={() => setZoomBild({ src: a.bildUrl, alt: a.titel })}
-                    style={{ width: "100%", borderRadius: 10, border: "1px solid var(--border)", display: "block", cursor: "zoom-in" }}
-                  />
-                )}
               </div>
-            ))}
+              );
+            })}
 
             <button
               onClick={() => {
@@ -6343,7 +6670,7 @@ function RettungsdienstDemoInner({ session, onLogout }) {
           }}
         >
           <p style={{ fontSize: 11, color: "var(--text-muted)", margin: 0, lineHeight: 1.6, fontWeight: 400 }}>
-            Entwickelt durch NotSan und RettSan.
+            Entwickelt von Sascha L. in Verbindung mit NotSan und RS.
           </p>
           <p style={{ fontSize: 12, color: "var(--text)", margin: "4px 0 0", lineHeight: 1.6, fontWeight: 800 }}>
             Demo-Prototyp — kein zertifiziertes Medizinprodukt.
@@ -6368,8 +6695,11 @@ function RettungsdienstDemoInner({ session, onLogout }) {
           </button>
         </div>
 
-        {/* Trauma-Referenz-Dialog — bewusst optisch klar anders als SOP-Karten */}
-        {traumaOffen && (
+        {/* Generische Referenzkarten-Dialog — Trauma, qSOFA, NEWS2, ... —
+            bewusst optisch klar anders als SOP-Karten */}
+        {referenzOffen && REFERENZ_KARTEN[referenzOffen] && (() => {
+          const ref = REFERENZ_KARTEN[referenzOffen];
+          return (
           <div
             style={{
               position: "fixed",
@@ -6382,17 +6712,17 @@ function RettungsdienstDemoInner({ session, onLogout }) {
               padding: 20,
               overflowY: "auto",
             }}
-            onClick={() => setTraumaOffen(false)}
+            onClick={() => setReferenzOffen(null)}
           >
             <div
               onClick={(e) => e.stopPropagation()}
               style={{
                 width: "100%",
-                maxWidth: 440,
+                maxWidth: 460,
                 maxHeight: "85vh",
                 overflowY: "auto",
                 background: "var(--card-active)",
-                border: `2px solid ${TRAUMA_REFERENZ.farbe}`,
+                border: `2px solid ${ref.farbe}`,
                 borderRadius: 16,
                 padding: 20,
               }}
@@ -6403,9 +6733,9 @@ function RettungsdienstDemoInner({ session, onLogout }) {
                   fontSize: 10,
                   fontWeight: 800,
                   letterSpacing: "0.05em",
-                  color: TRAUMA_REFERENZ.farbe,
-                  background: `${TRAUMA_REFERENZ.farbe}22`,
-                  border: `1px solid ${TRAUMA_REFERENZ.farbe}`,
+                  color: ref.farbe,
+                  background: `${ref.farbe}22`,
+                  border: `1px solid ${ref.farbe}`,
                   borderRadius: 6,
                   padding: "3px 8px",
                   marginBottom: 10,
@@ -6413,32 +6743,75 @@ function RettungsdienstDemoInner({ session, onLogout }) {
               >
                 EXTERNE QUELLE — KEIN SOP-INHALT
               </div>
-              <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 4 }}>{TRAUMA_REFERENZ.titel}</div>
+              <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 4 }}>{ref.titel}</div>
               <div style={{ fontSize: 11.5, color: "var(--text-muted)", marginBottom: 4, lineHeight: 1.4 }}>
-                {TRAUMA_REFERENZ.quelleName}
+                {ref.quelleName}
               </div>
               <div style={{ fontSize: 10.5, color: "var(--text-muted)", marginBottom: 14, lineHeight: 1.4 }}>
-                {TRAUMA_REFERENZ.quelleDetail}
+                {ref.quelleDetail}
               </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                {TRAUMA_REFERENZ.punkte.map((p, i) => (
-                  <div
-                    key={i}
-                    style={{
-                      display: "flex",
-                      gap: 8,
-                      fontSize: 12.5,
-                      lineHeight: 1.55,
-                      color: "var(--text)",
-                    }}
-                  >
-                    <span style={{ color: TRAUMA_REFERENZ.farbe, fontWeight: 700, flexShrink: 0 }}>•</span>
-                    <span>{p}</span>
-                  </div>
-                ))}
-              </div>
+
+              {ref.bildUrl && (
+                <img
+                  src={ref.bildUrl}
+                  alt={ref.titel}
+                  onClick={() => setZoomBild({ src: ref.bildUrl, alt: ref.titel })}
+                  style={{ width: "100%", borderRadius: 10, border: "1px solid var(--border)", display: "block", cursor: "zoom-in", marginBottom: 12 }}
+                />
+              )}
+              {ref.bildUrl2 && (
+                <img
+                  src={ref.bildUrl2}
+                  alt={ref.titel}
+                  onClick={() => setZoomBild({ src: ref.bildUrl2, alt: ref.titel })}
+                  style={{ width: "100%", borderRadius: 10, border: "1px solid var(--border)", display: "block", cursor: "zoom-in", marginBottom: 12 }}
+                />
+              )}
+
+              {ref.tabelle && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 12 }}>
+                  {ref.tabelle.map((row, i) => (
+                    <div
+                      key={i}
+                      style={{
+                        background: "var(--card)",
+                        border: "1px solid var(--border)",
+                        borderRadius: 8,
+                        padding: "8px 10px",
+                      }}
+                    >
+                      <div style={{ fontSize: 11.5, fontWeight: 700, color: ref.farbe, marginBottom: 2 }}>{row.label}</div>
+                      <div style={{ fontSize: 11.5, color: "var(--text)", lineHeight: 1.5 }}>
+                        {row.wert}
+                        {row.punkte ? ` — ${row.punkte}` : ""}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {ref.punkte && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {ref.punkte.map((p, i) => (
+                    <div
+                      key={i}
+                      style={{
+                        display: "flex",
+                        gap: 8,
+                        fontSize: 12.5,
+                        lineHeight: 1.55,
+                        color: "var(--text)",
+                      }}
+                    >
+                      <span style={{ color: ref.farbe, fontWeight: 700, flexShrink: 0 }}>•</span>
+                      <span>{p}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
               <button
-                onClick={() => setTraumaOffen(false)}
+                onClick={() => setReferenzOffen(null)}
                 style={{
                   width: "100%",
                   marginTop: 18,
@@ -6456,7 +6829,8 @@ function RettungsdienstDemoInner({ session, onLogout }) {
               </button>
             </div>
           </div>
-        )}
+          );
+        })()}
 
         {/* Bild-Zoom-Ansicht */}
         {zoomBild && (
