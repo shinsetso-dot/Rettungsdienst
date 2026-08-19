@@ -35,7 +35,7 @@ import {
 // angezeigt, damit Nutzer erkennen können, ob sie auf dem neuesten
 // Stand sind.
 // ═══════════════════════════════════════════════════════════════
-const APP_VERSION = "0.9";
+const APP_VERSION = "1.1";
 // Entwicklungsstufe — bleibt "Alpha", bis ausdrücklich auf "Beta"
 // umgestellt wird. NUR HIER ändern, wird überall automatisch übernommen.
 const APP_STUFE = "Alpha";
@@ -48,17 +48,8 @@ const APP_GROESSE = "≈ 5,9 MB";
 // Wird als Pflicht-Popup nach Updates gezeigt (einmalig pro Version).
 // ═══════════════════════════════════════════════════════════════
 const CHANGELOG = {
-  "0.9": [
-    "Echtes Zugangscode-System (100 individuelle Codes) ersetzt die alte Demo-Login-Attrappe.",
-    "Logout jetzt mit Warnhinweis und Bestätigung — Zugang danach nur mit neuem Code von Sascha.",
-    "Metronom auf technisch maximale Lautstärke gestellt (deutlich lauter als zuvor).",
-    "Sauerstoff-/SpO2-Referenz jetzt eigener Reiter statt Teil von Medikamente.",
-    "EKG-Kacheln: helles, gut lesbares Papier-Design statt dunklem Rot, jetzt auf-/zuklappbar.",
-    "Feedback: Mehrfachauswahl bei Kategorien möglich statt nur einer.",
-    "Medikamenten-Zähler: Alle Einträge auf einmal löschbar, Speicherort klarer beschrieben.",
-    "Kopf-Logo vergrößert, 'Einsatz' in 'Einsatzstichwort' umbenannt.",
-    "Dezentes Wasserzeichen (App-Logo) im Hintergrund ergänzt.",
-    "Entwicklungsstufe (Alpha) und App-Größe stehen jetzt immer mit bei der Versionsanzeige.",
+  "1.1": [
+    "Algorithmen-Liste (DA/DI + Hessen) sortiert jetzt korrekt nach Nummer (K1, K2, ... K16a/b/c, ... K20, P1–P5, V1a–V3b) statt nach Zufallsreihenfolge.",
   ],
 };
 
@@ -3218,6 +3209,23 @@ const REGION_FARBE = { darmstadt: "#FBBF24", hessen: "#14B8A6" };
 // Liefert die Badge-Darstellung für ein Element: eigene Regionsfarbe, oder
 // beide Farben (Gradient), falls derselbe K/P/V/M-Code auch in der jeweils
 // anderen Region existiert (= inhaltlich deckungsgleiche SOP-Vorgabe).
+// Sortiert Algorithmus-Karten nach ihrer echten Kategorie+Nummer (K1, K2,
+// ... K16, K16a, K16b, K16c, ... K20, dann P1-P5, dann V1a-V3b) statt nach
+// der zufälligen Reihenfolge, in der sie im Code angelegt wurden.
+function algoSortSchluessel(a) {
+  const match = (a.titel || "").match(/\(([A-Z])(\d+)([a-z]?)\)\s*$/);
+  if (!match) return [9, 999, ""]; // Karten ohne erkennbares Muster ans Ende
+  const kategorieRang = { K: 0, P: 1, V: 2 }[match[1]] ?? 8;
+  return [kategorieRang, parseInt(match[2], 10), match[3] || ""];
+}
+function algoSortVergleich(a, b) {
+  const [ka, na, sa] = algoSortSchluessel(a);
+  const [kb, nb, sb] = algoSortSchluessel(b);
+  if (ka !== kb) return ka - kb;
+  if (na !== nb) return na - nb;
+  return sa.localeCompare(sb);
+}
+
 function sopBadgeFarbe(text, eigeneRegion) {
   const code = extrahiereCode(text);
   const eigeneCodes = eigeneRegion === "hessen" ? HESSEN_ALGO_CODES : DA_DI_ALGO_CODES;
@@ -3419,34 +3427,39 @@ function TimerCard({ label, icon, timer, elapsed, onStart, onStop, onReset, unte
     <div
       style={{
         flex: 1,
+        minWidth: 0,
         background: `linear-gradient(160deg, ${farbe}26, ${farbe}0A)`,
         border: "1.5px solid",
         borderColor: `${farbe}77`,
-        borderRadius: 18,
-        padding: "14px 14px",
+        borderRadius: 16,
+        padding: "12px 10px",
         boxShadow: `0 8px 28px -12px ${farbe}66, inset 0 1px 0 ${farbe}22`,
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 7 }}>
         {Icon ? (
-          <Icon size={17} color={farbe} strokeWidth={2.25} />
+          <Icon size={14} color={farbe} strokeWidth={2.25} style={{ flexShrink: 0 }} />
         ) : (
           <span
             style={{
-              width: 9,
-              height: 9,
+              width: 8,
+              height: 8,
               borderRadius: 99,
               background: farbe,
+              flexShrink: 0,
             }}
           />
         )}
         <span
           style={{
-            fontSize: 20,
+            fontSize: 11,
             fontWeight: 800,
-            letterSpacing: "0.04em",
+            letterSpacing: "0.02em",
             textTransform: "uppercase",
             color: farbe,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
           }}
         >
           {label}
@@ -3455,16 +3468,16 @@ function TimerCard({ label, icon, timer, elapsed, onStart, onStop, onReset, unte
       <div
         style={{
           fontFamily: "'JetBrains Mono', monospace",
-          fontSize: 30,
+          fontSize: 24,
           fontWeight: 700,
           color: "var(--text)",
-          marginBottom: unterzeile ? 2 : 12,
+          marginBottom: unterzeile ? 2 : 10,
         }}
       >
         {formatZeit(elapsed)}
       </div>
       {unterzeile && (
-        <div style={{ fontSize: 10.5, color: farbe, fontWeight: 600, marginBottom: 10, minHeight: 13 }}>
+        <div style={{ fontSize: 10, color: farbe, fontWeight: 600, marginBottom: 9, minHeight: 12, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
           {unterzeile}
         </div>
       )}
@@ -5269,8 +5282,8 @@ function RettungsdienstDemoInner({ session, onLogout }) {
         {/* Tabs */}
         <div style={{ display: "flex", gap: 6, marginBottom: 18 }}>
           {[
-            { id: "medikamente", label: "Medikamente", icon: Pill, farbe: "#FF6A3D" },
-            { id: "sauerstoff", label: "Sauerstoff", icon: Wind, farbe: "#60A5FA" },
+            { id: "medikamente", label: "Medi's", icon: Pill, farbe: "#FF6A3D" },
+            { id: "sauerstoff", label: "O2", icon: Wind, farbe: "#60A5FA" },
             { id: "kinder", label: "Pädiatrie", icon: Baby, farbe: "#34D399" },
             { id: "ekg", label: "EKG", icon: Activity, farbe: "#F87171" },
             { id: "algorithmen", label: "Algorithmen", icon: ListChecks, farbe: "#FBBF24" },
@@ -5285,26 +5298,31 @@ function RettungsdienstDemoInner({ session, onLogout }) {
                 onClick={() => setTab(t.id)}
                 style={{
                   flex: 1,
+                  minWidth: 0,
+                  minHeight: 52,
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
                   justifyContent: "center",
                   gap: 3,
-                  padding: "9px 1px",
+                  padding: "8px 2px",
                   borderRadius: 13,
                   border: "1px solid",
                   borderColor: active ? t.farbe : "var(--border)",
                   background: active ? `linear-gradient(160deg, ${t.farbe}2E, ${t.farbe}12)` : "var(--card)",
                   color: active ? t.farbe : "var(--text-muted)",
-                  fontSize: 9.5,
+                  fontSize: 8.5,
                   fontWeight: 600,
                   cursor: "pointer",
                   boxShadow: active ? `0 6px 16px -8px ${t.farbe}99` : "none",
                   transition: "background 0.15s, box-shadow 0.15s",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
                 }}
               >
-                <Icon size={14} />
-                {t.label}
+                <Icon size={14} style={{ flexShrink: 0 }} />
+                <span style={{ overflow: "hidden", textOverflow: "ellipsis", maxWidth: "100%" }}>{t.label}</span>
               </button>
             );
           })}
@@ -6073,7 +6091,7 @@ function RettungsdienstDemoInner({ session, onLogout }) {
                   }}
                 >
                   <Badge tone="sop">REF</Badge>
-                  <span style={{ fontSize: 11, color: "var(--warn-text)" }}>Faktoren aus deinem Screenshot übernommen — Ampullenkonzentration weiterhin ungeprüft</span>
+                  <span style={{ fontSize: 11, color: "var(--warn-text)" }}>Externe Information, keine Vorabprüfung — bitte eigenständig auf Richtigkeit achten</span>
                 </div>
 
                 {(() => {
@@ -6150,8 +6168,7 @@ function RettungsdienstDemoInner({ session, onLogout }) {
                 <div style={{ display: "flex", gap: 10, background: "var(--card)", border: "1px solid var(--border)", borderRadius: 12, padding: "12px 14px", marginTop: 4 }}>
                   <Info size={15} color="var(--text-muted)" style={{ flexShrink: 0, marginTop: 2 }} />
                   <p style={{ fontSize: 11.5, color: "var(--text-muted)", margin: 0, lineHeight: 1.5 }}>
-                    Diese Kategorien sind in der Demo noch nicht mit Werten hinterlegt — sag mir, welche
-                    davon du zuerst ausgebaut haben willst.
+                    Aktuell keine Vergleichswerte hinterlegt.
                   </p>
                 </div>
               </div>
@@ -6491,11 +6508,10 @@ function RettungsdienstDemoInner({ session, onLogout }) {
                 <Info size={15} color="var(--text-muted)" style={{ flexShrink: 0, marginTop: 2 }} />
                 <div style={{ flex: 1 }}>
                   <p style={{ fontSize: 11.5, color: "var(--text-muted)", margin: 0, lineHeight: 1.5 }}>
-                    Die meisten Algorithmen (markiert „SOP") basieren auf den
-                    2026er-Algorithmen für Bergstraße/Darmstadt/Darmstadt-Dieburg/
-                    Groß-Gerau (Stand 31.01.2026). Das SOP-Dokument enthält weitere
-                    Algorithmen (u. a. K2, K15–K20, P1–P5, V1–V3), die noch nicht in
-                    dieser App abgebildet sind.
+                    Die Algorithmen (markiert „SOP") basieren auf den 2026er-Algorithmen für
+                    Bergstraße/Darmstadt/Darmstadt-Dieburg/Groß-Gerau (Stand 31.01.2026), inkl.
+                    K1–K20 (mit Unterkarten), P1–P5 und V1–V3. Trotzdem: Original-SOP-Dokument
+                    im Zweifel immer zusätzlich heranziehen.
                   </p>
                   <button
                     onClick={() => setAlgoInfoSeen(true)}
@@ -6535,10 +6551,11 @@ function RettungsdienstDemoInner({ session, onLogout }) {
             )}
 
             {[...(algoRegion === "hessen" ? ALGORITHMEN_HESSEN : ALGORITHMEN)].sort((a, b) => {
-              if (!algoPinned) return 0;
-              if (a.id === openAlgo) return -1;
-              if (b.id === openAlgo) return 1;
-              return 0;
+              if (algoPinned) {
+                if (a.id === openAlgo) return -1;
+                if (b.id === openAlgo) return 1;
+              }
+              return algoSortVergleich(a, b);
             }).map((a) => {
               const open = openAlgo === a.id;
               return (
@@ -7219,17 +7236,18 @@ function RettungsdienstDemoInner({ session, onLogout }) {
 export default function RettungsdienstDemo() {
   const [eingeloggt, setEingeloggt] = useState(() => {
     try {
-      // Standard: eingeloggt, AUSSER jemand hat sich zuvor aktiv abgemeldet
-      // (dann bleibt das über Neustarts/Neuinstallation des Icons hinweg
-      // gesperrt, bis ein gültiger Zugangscode eingegeben wird).
-      return localStorage.getItem("rd_ausgeloggt_v1") !== "true";
+      // Umgedreht: Standard ist NICHT eingeloggt. Nur wer bereits einmal
+      // erfolgreich einen Zugangscode eingegeben hat (rd_freigeschaltet_v1),
+      // kommt direkt rein — das gilt für die allererste Installation genauso
+      // wie nach einem Logout.
+      return localStorage.getItem("rd_freigeschaltet_v1") === "true";
     } catch {
-      return true;
+      return false;
     }
   });
   function wirklichAusloggen() {
     try {
-      localStorage.setItem("rd_ausgeloggt_v1", "true");
+      localStorage.removeItem("rd_freigeschaltet_v1");
     } catch {
       // Speicher nicht verfügbar — Sperre gilt dann nur für diese Sitzung.
     }
@@ -7237,7 +7255,7 @@ export default function RettungsdienstDemo() {
   }
   function eingeloggtSetzen() {
     try {
-      localStorage.removeItem("rd_ausgeloggt_v1");
+      localStorage.setItem("rd_freigeschaltet_v1", "true");
     } catch {
       // ignorieren
     }
