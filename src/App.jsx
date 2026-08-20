@@ -30,12 +30,16 @@ import {
 } from "lucide-react";
 
 // ═══════════════════════════════════════════════════════════════
-// APP-VERSION — bei jeder inhaltlichen Änderung um 0,1 erhöhen
-// (0.1 → 0.2 → ... → 0.9 → 1.0 → 1.1 → ...). Wird unten im Footer
-// angezeigt, damit Nutzer erkennen können, ob sie auf dem neuesten
-// Stand sind.
+// APP-VERSION — Echtes Semantic Versioning (SemVer): MAJOR.MINOR.PATCH
+//   MAJOR (0.x.x → 1.x.x): großer Meilenstein, z. B. Wechsel Alpha → Beta
+//   MINOR (x.1.x → x.2.x): neue Funktion hinzugekommen
+//   PATCH (x.x.1 → x.x.2): kleine Korrektur/Fehlerbehebung
+// Bleibt bei "0.x.x", solange APP_STUFE "Alpha" ist (SemVer-Konvention:
+// 0.x.x = aktive Entwicklung, kann sich noch stark ändern).
+// NICHT automatisch bei jeder Änderung hochzählen — nur wenn der Nutzer
+// ausdrücklich sagt "das ist jetzt fertig". Wird unten im Footer gezeigt.
 // ═══════════════════════════════════════════════════════════════
-const APP_VERSION = "1.1";
+const APP_VERSION = "0.1.0";
 // Entwicklungsstufe — bleibt "Alpha", bis ausdrücklich auf "Beta"
 // umgestellt wird. NUR HIER ändern, wird überall automatisch übernommen.
 const APP_STUFE = "Alpha";
@@ -44,12 +48,54 @@ const APP_STUFE = "Alpha";
 const APP_GROESSE = "≈ 5,9 MB";
 
 // ═══════════════════════════════════════════════════════════════
-// CHANGELOG — bei jeder Version hier einen neuen Eintrag ergänzen.
-// Wird als Pflicht-Popup nach Updates gezeigt (einmalig pro Version).
+// CHANGELOG — WICHTIG: bei jeder neuen Version einen NEUEN Eintrag
+// HINZUFÜGEN, alte Einträge NIEMALS löschen/überschreiben (das ist in
+// der Vergangenheit leider passiert, 0.8/0.9/1.0 unten sind aus dem
+// Gesprächsverlauf rekonstruiert). Das Popup zeigt bei jedem Update
+// weiterhin nur die JEWEILS NEUESTE Version — die komplette Liste hier
+// ist für die "Versionshistorie"-Ansicht im Menü gedacht.
 // ═══════════════════════════════════════════════════════════════
 const CHANGELOG = {
-  "1.1": [
-    "Algorithmen-Liste (DA/DI + Hessen) sortiert jetzt korrekt nach Nummer (K1, K2, ... K16a/b/c, ... K20, P1–P5, V1a–V3b) statt nach Zufallsreihenfolge.",
+  "0.8": [
+    "NEWS2- und qSOFA-Score als eigene Referenzkarten ergänzt, bei der Sepsis-Karte (K18) direkt verlinkt.",
+    "PsychKHG Hessen (Unterbringung bei Selbst-/Fremdgefährdung) als Rechts-Referenzkarte mit Quellenangabe ergänzt.",
+    "MANV/mSTART sind jetzt aufklappbar statt permanent geöffnet — wie die Algorithmus-Karten.",
+    "Einsatz-Schnellauswahl erweitert (Trauma, qSOFA, PsychKHG, MANV ergänzt) und alphabetisch sortiert.",
+    "Kopfbereich übersichtlicher: Einstellungen jetzt über ein Menü statt vieler Einzel-Symbole.",
+    "App-Logo im Kopfbereich an das echte Homescreen-Icon angeglichen.",
+    "Update-Hinweis (Popup bei neuer Version) neu eingeführt.",
+  ],
+  "0.9": [
+    "Echtes Zugangscode-System (100 individuelle Codes) ersetzt die alte Demo-Login-Attrappe.",
+    "Logout jetzt mit Warnhinweis und Bestätigung — Zugang danach nur mit Code.",
+    "Metronom auf technisch maximale Lautstärke gestellt.",
+    "Sauerstoff-/SpO2-Referenz jetzt eigener Reiter statt Teil von Medikamente.",
+    "EKG-Kacheln: helles, gut lesbares Papier-Design statt dunklem Rot, jetzt auf-/zuklappbar.",
+    "Feedback: Mehrfachauswahl bei Kategorien möglich statt nur einer.",
+    "Medikamenten-Zähler: alle Einträge auf einmal löschbar, Speicherort klarer beschrieben.",
+    "Kopf-Logo vergrößert, 'Einsatz' in 'Einsatzstichwort' umbenannt.",
+    "Dezentes Wasserzeichen (App-Logo) im Hintergrund ergänzt.",
+    "Entwicklungsstufe (Alpha) und App-Größe stehen jetzt immer mit bei der Versionsanzeige.",
+  ],
+  "1.0": [
+    "Zugangscode ist jetzt der allererste Schritt beim Öffnen der App — auch bei Erstinstallation.",
+    "Zwei interne Platzhaltertexte durch sauberen, für Nutzer gedachten Text ersetzt.",
+    "Veralteten Hinweis zu 'fehlenden' Algorithmen korrigiert — K1–K20, P1–P5, V1–V3 sind vollständig enthalten.",
+    "Kopfbereich: Einsatzstichwort- und REA-Timer-Kacheln verkleinert, damit sie nebeneinander passen.",
+    "Tab-Leiste: alle Kacheln gleich hoch, Medikamente→Medi's, Sauerstoff→O2 umbenannt.",
+  ],
+  "1.2": [
+    "Algorithmen-Liste sortiert jetzt korrekt nach Nummer (K1, K2, ... K16a/b/c, ... K20, P1–P5, V1a–V3b) statt nach Zufallsreihenfolge.",
+    "Neue 'Versionshistorie' im Menü — zeigt alle bisherigen Updates auf einen Blick.",
+    "Neues 'Prüfprotokoll' im Menü — dokumentiert sichtbar, wann und wie Inhalte gegen die Original-SOP-Quellen abgeglichen wurden.",
+    "Feedback-Dialog: Zusicherung ergänzt, Meldungen werden in der Regel innerhalb von 7 Tagen gelesen — mit Hinweis für dringende, sicherheitsrelevante Meldungen.",
+    "Kontraindikationen werden jetzt auch bei den in Algorithmus-Karten angepinnten Medikamenten angezeigt, nicht mehr nur im Medikamente-Tab.",
+    "Quellcode-Schutz verstärkt: Source Maps deaktiviert, stärkere Verschleierung (Terser) beim Bauen der App.",
+  ],
+  // Ab hier: echtes Semantic Versioning (MAJOR.MINOR.PATCH), Neustart bei 0.1.0.
+  "0.1.0": [
+    "Salbutamol- und Atrovent-Konzentrationen mit Original-Produktfotos abgeglichen.",
+    "Neues Versionsnummer-Format (MAJOR.MINOR.PATCH) für klarere Unterscheidung zwischen kleinen Korrekturen und größeren Neuerungen.",
   ],
 };
 
@@ -578,10 +624,10 @@ const MEDIKAMENTE = [
     hinweis: "Kind: 1 Amp., bei >20 kg nach 15 min. wiederholbar. Erw.: 2 Amp. mit O2 vernebeln, nach 15 min. wiederholen.",
     farbe: "#34D399",
     dosisQuelle: "sop",
-    handelsname: null,
-    ampulleGeprueft: false,
-    geprueftVon: null,
-    geprueftAm: null,
+    handelsname: "Salbutamol AL",
+    ampulleGeprueft: true,
+    geprueftVon: "Konzentration mit vorliegendem Produktfoto abgeglichen (keine formale Validierung)",
+    geprueftAm: "20.08.2026",
   },
   {
     id: "ipratropiumbromid",
@@ -597,10 +643,10 @@ const MEDIKAMENTE = [
     hinweis: "Kind: nach jeweils 20 min. 2x wiederholbar. Erw.: mit O2 vernebeln, nach 30 min. wiederholbar.",
     farbe: "#34D399",
     dosisQuelle: "sop",
-    handelsname: null,
-    ampulleGeprueft: false,
-    geprueftVon: null,
-    geprueftAm: null,
+    handelsname: "Atrovent",
+    ampulleGeprueft: true,
+    geprueftVon: "Konzentration mit vorliegendem Produktfoto abgeglichen (keine formale Validierung)",
+    geprueftAm: "20.08.2026",
   },
   {
     id: "adrenalin-vernebelt",
@@ -1608,6 +1654,26 @@ const PSYCHKHG_REFERENZ = {
     "Dies ist eine Orientierungshilfe, KEINE Rechtsberatung und kein Ersatz für den tatsächlichen Gesetzestext oder Rücksprache mit dem Notarzt/der Leitstelle im Einzelfall. Vollständiger, verbindlicher Text: rv.hessenrecht.hessen.de.",
   ],
 };
+
+// ═══════════════════════════════════════════════════════════════
+// PRÜFPROTOKOLL — dokumentiert sichtbar, welche Inhalte gezielt gegen
+// die Original-SOP-Quellen abgeglichen wurden, inkl. Datum und Befund.
+// Dient als nachweisbare Sorgfaltsdokumentation, nicht nur als interne
+// Notiz — deshalb bewusst in der App selbst sichtbar, nicht nur im
+// Entwicklungs-Chat.
+// ═══════════════════════════════════════════════════════════════
+const PRUEFPROTOKOLL = [
+  {
+    datum: "18.08.2026",
+    bereich: "DA/DI: Medikamente M1–M28 gegen Algorithmen-Karten K1–K20",
+    befund: "Vollständiger Kreuzabgleich durchgeführt. 4 Widersprüche zwischen Algorithmus-Bild und zugehöriger M-Referenzseite gefunden und in der App sichtbar markiert (Adrenalin >60kg: 0,5 vs. 0,6 mg; Midazolam-Maximaldosis: 5 vs. 10 mg; Levetiracetam ohne eigene M-Seite; Prednisolon-Kinderdosis i.v. ohne M-Beleg).",
+  },
+  {
+    datum: "18.08.2026",
+    bereich: "Hessen: M-Seiten stichprobenartig gegen DA/DI verglichen (Adrenalin, ASS, Urapidil, Midazolam, Nalbuphin, Glucose)",
+    befund: "Region-spezifische, echte Unterschiede bestätigt (keine Digitalisierungsfehler) — beide Datensätze bewusst getrennt gehalten.",
+  },
+];
 
 const REFERENZ_KARTEN = {
   trauma: TRAUMA_REFERENZ,
@@ -3769,6 +3835,8 @@ function RettungsdienstDemoInner({ session, onLogout }) {
   const [manvOffenId, setManvOffenId] = useState(null);
   const [kopfMenuOffen, setKopfMenuOffen] = useState(false);
   const [logoutBestaetigungOffen, setLogoutBestaetigungOffen] = useState(false);
+  const [versionsHistorieOffen, setVersionsHistorieOffen] = useState(false);
+  const [pruefprotokollOffen, setPruefprotokollOffen] = useState(false);
   const [ekgOffenId, setEkgOffenId] = useState(null);
 
   function disclaimerBestaetigen() {
@@ -4617,12 +4685,36 @@ function RettungsdienstDemoInner({ session, onLogout }) {
                     style={{
                       display: "flex", alignItems: "center", gap: 10, width: "100%",
                       padding: "12px 14px", background: "transparent", border: "none",
-                      borderBottom: onLogout ? "1px solid var(--border)" : "none", color: "var(--text)",
+                      borderBottom: "1px solid var(--border)", color: "var(--text)",
                       fontSize: 13, fontWeight: 600, cursor: "pointer", textAlign: "left",
                     }}
                   >
                     <MessageSquarePlus size={16} />
                     Feedback geben
+                  </button>
+                  <button
+                    onClick={() => { setVersionsHistorieOffen(true); setKopfMenuOffen(false); }}
+                    style={{
+                      display: "flex", alignItems: "center", gap: 10, width: "100%",
+                      padding: "12px 14px", background: "transparent", border: "none",
+                      borderBottom: "1px solid var(--border)", color: "var(--text)",
+                      fontSize: 13, fontWeight: 600, cursor: "pointer", textAlign: "left",
+                    }}
+                  >
+                    <ListChecks size={16} />
+                    Versionshistorie
+                  </button>
+                  <button
+                    onClick={() => { setPruefprotokollOffen(true); setKopfMenuOffen(false); }}
+                    style={{
+                      display: "flex", alignItems: "center", gap: 10, width: "100%",
+                      padding: "12px 14px", background: "transparent", border: "none",
+                      borderBottom: onLogout ? "1px solid var(--border)" : "none", color: "var(--text)",
+                      fontSize: 13, fontWeight: 600, cursor: "pointer", textAlign: "left",
+                    }}
+                  >
+                    <ShieldAlert size={16} />
+                    Prüfprotokoll
                   </button>
                   {onLogout && (
                     <button
@@ -4997,8 +5089,22 @@ function RettungsdienstDemoInner({ session, onLogout }) {
               }}
             >
               <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 4 }}>Feedback geben</div>
-              <div style={{ fontSize: 12.5, color: "var(--text-muted)", marginBottom: 14, lineHeight: 1.4 }}>
+              <div style={{ fontSize: 12.5, color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.4 }}>
                 Öffnet deine Mail-App mit vorausgefülltem Text — dort einfach senden.
+              </div>
+              <div
+                style={{
+                  display: "flex", gap: 8, alignItems: "flex-start",
+                  background: "var(--card)", border: "1px solid var(--border)", borderRadius: 10,
+                  padding: "9px 11px", marginBottom: 14,
+                }}
+              >
+                <ShieldAlert size={14} color="#34D399" style={{ flexShrink: 0, marginTop: 1 }} />
+                <span style={{ fontSize: 11, color: "var(--text-secondary)", lineHeight: 1.5 }}>
+                  Jede Meldung wird persönlich von Sascha L. gelesen — <strong>in der Regel innerhalb von
+                  7 Tagen</strong>. Bei einem sicherheitsrelevanten Fehler (z. B. falsche Dosierung) bitte
+                  zusätzlich „DRINGEND" in den Text schreiben.
+                </span>
               </div>
 
               <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", marginBottom: 6, letterSpacing: "0.04em" }}>
@@ -6687,6 +6793,29 @@ function RettungsdienstDemoInner({ session, onLogout }) {
                                       </span>
                                     </div>
                                   )}
+                                  {m.kontraindikationen && m.kontraindikationen.length > 0 && (
+                                    <div
+                                      style={{
+                                        marginTop: 6,
+                                        paddingTop: 6,
+                                        borderTop: "1px solid #FDE68A",
+                                      }}
+                                    >
+                                      <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 3 }}>
+                                        <ShieldAlert size={11} color="#B91C1C" />
+                                        <span style={{ fontSize: 10, fontWeight: 800, color: "#B91C1C", letterSpacing: "0.03em", textTransform: "uppercase" }}>
+                                          Kontraindikationen
+                                        </span>
+                                      </div>
+                                      <ul style={{ margin: 0, paddingLeft: 15, display: "flex", flexDirection: "column", gap: 2 }}>
+                                        {m.kontraindikationen.map((k, i) => (
+                                          <li key={i} style={{ fontSize: 11, color: "#92400E", lineHeight: 1.4 }}>
+                                            {k}
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    </div>
+                                  )}
                                   <button
                                     onClick={() =>
                                       medikamentGeben(
@@ -7159,6 +7288,109 @@ function RettungsdienstDemoInner({ session, onLogout }) {
                 >
                   Ja, abmelden
                 </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Versionshistorie */}
+        {versionsHistorieOffen && (
+          <div
+            style={{
+              position: "fixed", inset: 0, background: "rgba(11,18,32,0.85)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              zIndex: 65, padding: 20,
+            }}
+            onClick={() => setVersionsHistorieOffen(false)}
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                width: "100%", maxWidth: 440, maxHeight: "80vh", overflowY: "auto",
+                background: "var(--card-active)", border: "1px solid var(--border)",
+                borderRadius: 16, padding: 20,
+              }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+                <span style={{ fontSize: 15, fontWeight: 700 }}>Versionshistorie</span>
+                <button
+                  onClick={() => setVersionsHistorieOffen(false)}
+                  style={{ background: "transparent", border: "none", color: "var(--text-muted)", cursor: "pointer", padding: 4 }}
+                >
+                  <X size={18} />
+                </button>
+              </div>
+              <p style={{ fontSize: 11, color: "var(--text-muted)", margin: "0 0 16px" }}>
+                Alle bisherigen Updates, neueste zuerst.
+              </p>
+              {[...Object.keys(CHANGELOG)].reverse()
+                .map((version) => (
+                  <div key={version} style={{ marginBottom: 16 }}>
+                    <div style={{ fontSize: 12.5, fontWeight: 700, color: "#60A5FA", marginBottom: 6 }}>
+                      Version {version}{version === APP_VERSION ? ` (${APP_STUFE}, aktuell)` : ""}
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                      {CHANGELOG[version].map((p, i) => (
+                        <div key={i} style={{ display: "flex", gap: 7, fontSize: 12, lineHeight: 1.5, color: "var(--text-secondary)" }}>
+                          <span style={{ color: "#60A5FA", fontWeight: 700, flexShrink: 0 }}>•</span>
+                          <span>{p}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+            </div>
+          </div>
+        )}
+
+        {/* Prüfprotokoll — sichtbarer Sorgfaltsnachweis */}
+        {pruefprotokollOffen && (
+          <div
+            style={{
+              position: "fixed", inset: 0, background: "rgba(11,18,32,0.85)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              zIndex: 65, padding: 20,
+            }}
+            onClick={() => setPruefprotokollOffen(false)}
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                width: "100%", maxWidth: 440, maxHeight: "80vh", overflowY: "auto",
+                background: "var(--card-active)", border: "1px solid var(--border)",
+                borderRadius: 16, padding: 20,
+              }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+                <span style={{ fontSize: 15, fontWeight: 700 }}>Prüfprotokoll</span>
+                <button
+                  onClick={() => setPruefprotokollOffen(false)}
+                  style={{ background: "transparent", border: "none", color: "var(--text-muted)", cursor: "pointer", padding: 4 }}
+                >
+                  <X size={18} />
+                </button>
+              </div>
+              <p style={{ fontSize: 11.5, color: "var(--text-muted)", margin: "0 0 16px", lineHeight: 1.5 }}>
+                Dokumentiert, wann und wie Inhalte gezielt gegen die Original-SOP-Quellen
+                abgeglichen wurden — als nachvollziehbarer Nachweis, nicht nur als interne Notiz.
+                Ersetzt keine eigenständige Prüfung vor jeder Anwendung.
+              </p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                {PRUEFPROTOKOLL.map((p, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      background: "var(--card)", border: "1px solid var(--border)",
+                      borderRadius: 10, padding: "10px 12px",
+                    }}
+                  >
+                    <div style={{ fontSize: 10.5, fontWeight: 700, color: "#34D399", marginBottom: 4 }}>
+                      {p.datum}
+                    </div>
+                    <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 4 }}>{p.bereich}</div>
+                    <div style={{ fontSize: 11.5, color: "var(--text-secondary)", lineHeight: 1.5 }}>{p.befund}</div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>

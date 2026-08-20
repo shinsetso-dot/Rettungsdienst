@@ -17,5 +17,23 @@ export default defineConfig({
   build: {
     outDir: "dist",
     assetsInlineLimit: 0, // Bilder als echte Dateien behalten, nicht wieder inlinen
+    sourcemap: false, // Keine Source Maps ausliefern — sonst lässt sich der
+    // Original-Quellcode 1:1 über die Browser-Entwicklertools rekonstruieren.
+    minify: "terser", // Stärker als der Vite-Standard (esbuild): benennt
+    // Variablen/Funktionen kurz um, entfernt Kommentare/Leerzeichen und
+    // console.log-Aufrufe — macht den ausgelieferten Code für Fremde deutlich
+    // schwerer lesbar, ändert am Verhalten der App nichts.
+    terserOptions: {
+      format: {
+        comments: false, // Alle Kommentare aus dem Ausgabe-Code entfernen
+      },
+      compress: {
+        drop_console: true, // console.log()-Aufrufe im Ausgabe-Code entfernen
+        drop_debugger: true,
+      },
+      mangle: {
+        toplevel: true, // Auch Namen auf oberster Ebene kurz umbenennen
+      },
+    },
   },
 });
