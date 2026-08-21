@@ -39,7 +39,7 @@ import {
 // NICHT automatisch bei jeder Änderung hochzählen — nur wenn der Nutzer
 // ausdrücklich sagt "das ist jetzt fertig". Wird unten im Footer gezeigt.
 // ═══════════════════════════════════════════════════════════════
-const APP_VERSION = "0.2.3";
+const APP_VERSION = "0.3.0";
 // Entwicklungsstufe — bleibt "Alpha", bis ausdrücklich auf "Beta"
 // umgestellt wird. NUR HIER ändern, wird überall automatisch übernommen.
 const APP_STUFE = "Alpha";
@@ -110,6 +110,10 @@ const CHANGELOG = {
   ],
   "0.2.3": [
     "Pädiatrie-Regler: der Ziehpunkt selbst färbt sich jetzt ebenfalls in der Zonenfarbe ein (vorher blieb er fest weiß, obwohl Rahmen und Hintergrund schon korrekt reagierten).",
+  ],
+  "0.3.0": [
+    "Medikamenten-Zähler und Einsatzprotokoll sind jetzt verknüpft: eine Gabe über 'Jetzt gegeben — protokollieren' zählt automatisch mit, und ein gelöschter Protokoll-Eintrag nimmt den Zähler wieder zurück.",
+    "Neue Live-Suche im Algorithmen-Tab — filtert die Liste schon ab 2 eingegebenen Zeichen.",
   ],
 };
 
@@ -3852,6 +3856,7 @@ function RettungsdienstDemoInner({ session, onLogout }) {
   const [versionsHistorieOffen, setVersionsHistorieOffen] = useState(false);
   const [pruefprotokollOffen, setPruefprotokollOffen] = useState(false);
   const [ekgOffenId, setEkgOffenId] = useState(null);
+  const [algoSuche, setAlgoSuche] = useState("");
 
   function disclaimerBestaetigen() {
     try {
@@ -4107,14 +4112,36 @@ function RettungsdienstDemoInner({ session, onLogout }) {
     algorithmusOeffnen(algoId, algoId === "cpr-kind" || algoId === "cpr-neugeborenes");
   }
 
-  function medikamentGeben(name, dosisText, mlText) {
+  function medikamentGeben(medId, name, dosisText, mlText) {
     const jetzt = new Date();
     const zeit = `${String(jetzt.getHours()).padStart(2, "0")}:${String(jetzt.getMinutes()).padStart(2, "0")}:${String(jetzt.getSeconds()).padStart(2, "0")}`;
-    setReaLog((prev) => [...prev, { name, dosisText, mlText, zeit }]);
+    setReaLog((prev) => [...prev, { medId, name, dosisText, mlText, zeit }]);
+    // Fließt automatisch in den persönlichen Medikamenten-Zähler mit ein —
+    // eine Gabe hier zählt genauso wie ein manuelles "+" im Zähler-Dialog.
+    if (medId) {
+      setMedZaehler((z) => ({ ...z, [medId]: (z[medId] || 0) + 1 }));
+    }
   }
 
   function reaLogEintragLoeschen(index) {
-    setReaLog((prev) => prev.filter((_, i) => i !== index));
+    setReaLog((prev) => {
+      const eintrag = prev[index];
+      // Beim Löschen eines Protokoll-Eintrags auch den zugehörigen Zähler
+      // um genau 1 zurücknehmen — nicht den ganzen Zähler auf 0 setzen,
+      // falls dasselbe Medikament noch öfter gegeben wurde.
+      if (eintrag && eintrag.medId) {
+        setMedZaehler((z) => {
+          const aktuell = z[eintrag.medId] || 0;
+          if (aktuell <= 1) {
+            const neu = { ...z };
+            delete neu[eintrag.medId];
+            return neu;
+          }
+          return { ...z, [eintrag.medId]: aktuell - 1 };
+        });
+      }
+      return prev.filter((_, i) => i !== index);
+    });
   }
 
   function einsatzBeendenAnfragen() {
@@ -6609,6 +6636,42 @@ function RettungsdienstDemoInner({ session, onLogout }) {
               ))}
             </div>
 
+            {/* Live-Suche — filtert schon ab 2 Zeichen */}
+            <div style={{ position: "relative", marginBottom: 2 }}>
+              <input
+                type="text"
+                value={algoSuche}
+                onChange={(e) => setAlgoSuche(e.target.value)}
+                placeholder='Algorithmus suchen (z. B. "Anaphylaxie" oder "K9")...'
+                style={{
+                  width: "100%",
+                  boxSizing: "border-box",
+                  padding: "11px 36px 11px 14px",
+                  borderRadius: 11,
+                  border: "1px solid var(--border)",
+                  background: "var(--card)",
+                  color: "var(--text)",
+                  fontSize: 13.5,
+                }}
+              />
+              {algoSuche ? (
+                <button
+                  onClick={() => setAlgoSuche("")}
+                  style={{
+                    position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)",
+                    background: "transparent", border: "none", color: "var(--text-muted)",
+                    cursor: "pointer", padding: 6,
+                  }}
+                >
+                  <X size={15} />
+                </button>
+              ) : (
+                <span style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", pointerEvents: "none", color: "var(--text-muted)" }}>
+                  <ListChecks size={15} />
+                </span>
+              )}
+            </div>
+
             {/* Einmalige Hinweis-Meldung — poppt nur beim ersten Öffnen des Tabs auf */}
             {!algoInfoSeen && (
               <div
@@ -6667,7 +6730,13 @@ function RettungsdienstDemoInner({ session, onLogout }) {
               </div>
             )}
 
-            {[...(algoRegion === "hessen" ? ALGORITHMEN_HESSEN : ALGORITHMEN)].sort((a, b) => {
+            {[...(algoRegion === "hessen" ? ALGORITHMEN_HESSEN : ALGORITHMEN)]
+              .filter((a) => {
+                const suche = algoSuche.trim().toLowerCase();
+                if (suche.length < 2) return true; // Erst ab 2 Zeichen filtern
+                return a.titel.toLowerCase().includes(suche);
+              })
+              .sort((a, b) => {
               if (algoPinned) {
                 if (a.id === openAlgo) return -1;
                 if (b.id === openAlgo) return 1;
@@ -6830,6 +6899,7 @@ function RettungsdienstDemoInner({ session, onLogout }) {
                                   <button
                                     onClick={() =>
                                       medikamentGeben(
+                                        m.id,
                                         m.name,
                                         m.einheitIE ? `${erg.mg} IE` : m.einheitML ? `${erg.mg} ml` : `${erg.mg} mg`,
                                         `${erg.ml} ml`
@@ -6969,6 +7039,20 @@ function RettungsdienstDemoInner({ session, onLogout }) {
                 </div>
               );
             })}
+
+            {(() => {
+              const suche = algoSuche.trim().toLowerCase();
+              if (suche.length < 2) return null;
+              const liste = algoRegion === "hessen" ? ALGORITHMEN_HESSEN : ALGORITHMEN;
+              const treffer = liste.filter((a) => a.titel.toLowerCase().includes(suche));
+              if (treffer.length > 0) return null;
+              return (
+                <div style={{ textAlign: "center", padding: "24px 12px", color: "var(--text-muted)" }}>
+                  <ListChecks size={22} style={{ marginBottom: 8, opacity: 0.5 }} />
+                  <div style={{ fontSize: 13 }}>Keine Algorithmen gefunden für "{algoSuche}"</div>
+                </div>
+              );
+            })()}
 
           </div>
         )}
