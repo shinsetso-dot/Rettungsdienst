@@ -39,7 +39,7 @@ import {
 // NICHT automatisch bei jeder Änderung hochzählen — nur wenn der Nutzer
 // ausdrücklich sagt "das ist jetzt fertig". Wird unten im Footer gezeigt.
 // ═══════════════════════════════════════════════════════════════
-const APP_VERSION = "0.2.2";
+const APP_VERSION = "0.2.3";
 // Entwicklungsstufe — bleibt "Alpha", bis ausdrücklich auf "Beta"
 // umgestellt wird. NUR HIER ändern, wird überall automatisch übernommen.
 const APP_STUFE = "Alpha";
@@ -107,6 +107,9 @@ const CHANGELOG = {
   ],
   "0.2.2": [
     "Kontraindikationen bei Medikamenten werden jetzt durchgängig in Rot angezeigt — sowohl im Medikamente-Tab als auch bei den in Algorithmus-Karten angepinnten Medikamenten. Vorher war der Text zu unauffällig (bräunlich statt rot).",
+  ],
+  "0.2.3": [
+    "Pädiatrie-Regler: der Ziehpunkt selbst färbt sich jetzt ebenfalls in der Zonenfarbe ein (vorher blieb er fest weiß, obwohl Rahmen und Hintergrund schon korrekt reagierten).",
   ],
 };
 
@@ -6009,9 +6012,9 @@ function RettungsdienstDemoInner({ session, onLogout }) {
                     width: 24,
                     height: 52,
                     borderRadius: 8,
-                    background: "var(--text)",
+                    background: PEDIATRIE_ZONEN[Math.round(zonePos)].hex,
                     border: "3px solid var(--card)",
-                    boxShadow: "0 2px 10px rgba(0,0,0,0.35)",
+                    boxShadow: `0 2px 12px ${PEDIATRIE_ZONEN[Math.round(zonePos)].hex}99`,
                     pointerEvents: "none",
                   }}
                 />
