@@ -39,7 +39,7 @@ import {
 // NICHT automatisch bei jeder Änderung hochzählen — nur wenn der Nutzer
 // ausdrücklich sagt "das ist jetzt fertig". Wird unten im Footer gezeigt.
 // ═══════════════════════════════════════════════════════════════
-const APP_VERSION = "0.2.0";
+const APP_VERSION = "0.2.2";
 // Entwicklungsstufe — bleibt "Alpha", bis ausdrücklich auf "Beta"
 // umgestellt wird. NUR HIER ändern, wird überall automatisch übernommen.
 const APP_STUFE = "Alpha";
@@ -100,6 +100,13 @@ const CHANGELOG = {
   "0.2.0": [
     "Logo (Kopfbereich, Wasserzeichen, Homescreen-Icon) überarbeitet: dunkler Hintergrund statt Orange, rote Pulslinie, Kreuz-Symbol entfernt.",
     "Wichtig: Das Homescreen-Icon aktualisiert sich NICHT automatisch bei bereits installierten Geräten — iOS lädt es nur einmal beim Installieren. Wer das neue Icon sehen möchte, muss es einmalig vom Homescreen löschen und über die App-Adresse neu hinzufügen.",
+  ],
+  "0.2.1": [
+    "Pädiatrie-Regler: Hintergrund der Wertekarte färbt sich jetzt passend zur ausgewählten Zonenfarbe ein.",
+    "Pädiatrie-Regler: Kartengröße bleibt beim Ziehen jetzt konstant, statt beim Alterswechsel zu springen.",
+  ],
+  "0.2.2": [
+    "Kontraindikationen bei Medikamenten werden jetzt durchgängig in Rot angezeigt — sowohl im Medikamente-Tab als auch bei den in Algorithmus-Karten angepinnten Medikamenten. Vorher war der Text zu unauffällig (bräunlich statt rot).",
   ],
 };
 
@@ -5840,7 +5847,7 @@ function RettungsdienstDemoInner({ session, onLogout }) {
                             </div>
                             <ul style={{ margin: 0, paddingLeft: 16, display: "flex", flexDirection: "column", gap: 5 }}>
                               {m.kontraindikationen.map((k, i) => (
-                                <li key={i} style={{ fontSize: 12, color: "var(--text-secondary)", lineHeight: 1.5 }}>
+                                <li key={i} style={{ fontSize: 12, color: "#EF4444", fontWeight: 600, lineHeight: 1.5 }}>
                                   {k}
                                 </li>
                               ))}
@@ -5940,29 +5947,30 @@ function RettungsdienstDemoInner({ session, onLogout }) {
             {/* Werte-Anzeige */}
             <div
               style={{
-                background: "var(--card)",
+                background: `linear-gradient(160deg, ${PEDIATRIE_ZONEN[Math.round(zonePos)].hex}22, var(--card))`,
                 border: `2px solid ${PEDIATRIE_ZONEN[Math.round(zonePos)].hex}`,
                 borderRadius: 16,
                 padding: "20px 20px 22px",
                 marginBottom: 14,
+                transition: "background 0.15s, border-color 0.15s",
               }}
             >
               <div style={{ display: "flex", gap: 14, marginBottom: 18 }}>
-                <div style={{ flex: 1 }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 11.5, color: "var(--text-muted)", fontWeight: 700, letterSpacing: "0.06em" }}>ALTER</div>
-                  <div style={{ fontSize: 22, fontWeight: 800, marginTop: 3, lineHeight: 1.15 }}>
+                  <div style={{ fontSize: 22, fontWeight: 800, marginTop: 3, lineHeight: 1.15, minHeight: 52, display: "flex", alignItems: "center" }}>
                     {formatAlter(interpNum(zonePos, "alterMonate", 1))}
                   </div>
                 </div>
-                <div style={{ flex: 1 }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 11.5, color: "var(--text-muted)", fontWeight: 700, letterSpacing: "0.06em" }}>GEWICHT</div>
-                  <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 22, fontWeight: 800, marginTop: 3 }}>
+                  <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 22, fontWeight: 800, marginTop: 3, minHeight: 52, display: "flex", alignItems: "center" }}>
                     {interpNum(zonePos, "gewicht", 0.5)} kg
                   </div>
                 </div>
-                <div style={{ flex: 1 }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 11.5, color: "var(--text-muted)", fontWeight: 700, letterSpacing: "0.06em" }}>GRÖSSE</div>
-                  <div style={{ fontSize: 18, fontWeight: 800, marginTop: 4 }}>
+                  <div style={{ fontSize: 18, fontWeight: 800, marginTop: 4, minHeight: 52, display: "flex", alignItems: "center" }}>
                     ≈ {interpNum(zonePos, "groesseCm", 1)} cm
                   </div>
                 </div>
@@ -6809,7 +6817,7 @@ function RettungsdienstDemoInner({ session, onLogout }) {
                                       </div>
                                       <ul style={{ margin: 0, paddingLeft: 15, display: "flex", flexDirection: "column", gap: 2 }}>
                                         {m.kontraindikationen.map((k, i) => (
-                                          <li key={i} style={{ fontSize: 11, color: "#92400E", lineHeight: 1.4 }}>
+                                          <li key={i} style={{ fontSize: 11, color: "#DC2626", fontWeight: 700, lineHeight: 1.4 }}>
                                             {k}
                                           </li>
                                         ))}
