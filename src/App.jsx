@@ -39,7 +39,7 @@ import {
 // NICHT automatisch bei jeder Änderung hochzählen — nur wenn der Nutzer
 // ausdrücklich sagt "das ist jetzt fertig". Wird unten im Footer gezeigt.
 // ═══════════════════════════════════════════════════════════════
-const APP_VERSION = "0.1.0";
+const APP_VERSION = "0.2.0";
 // Entwicklungsstufe — bleibt "Alpha", bis ausdrücklich auf "Beta"
 // umgestellt wird. NUR HIER ändern, wird überall automatisch übernommen.
 const APP_STUFE = "Alpha";
@@ -96,6 +96,10 @@ const CHANGELOG = {
   "0.1.0": [
     "Salbutamol- und Atrovent-Konzentrationen mit Original-Produktfotos abgeglichen.",
     "Neues Versionsnummer-Format (MAJOR.MINOR.PATCH) für klarere Unterscheidung zwischen kleinen Korrekturen und größeren Neuerungen.",
+  ],
+  "0.2.0": [
+    "Logo (Kopfbereich, Wasserzeichen, Homescreen-Icon) überarbeitet: dunkler Hintergrund statt Orange, rote Pulslinie, Kreuz-Symbol entfernt.",
+    "Wichtig: Das Homescreen-Icon aktualisiert sich NICHT automatisch bei bereits installierten Geräten — iOS lädt es nur einmal beim Installieren. Wer das neue Icon sehen möchte, muss es einmalig vom Homescreen löschen und über die App-Adresse neu hinzufügen.",
   ],
 };
 
@@ -4516,7 +4520,7 @@ function RettungsdienstDemoInner({ session, onLogout }) {
             }),
       }}
     >
-      {/* Dezentes Wasserzeichen — dasselbe Puls+Kreuz-Motiv wie das App-Icon,
+      {/* Dezentes Wasserzeichen — dasselbe Puls-Motiv wie das App-Icon,
           fix im Hintergrund, stört den Inhalt nicht. */}
       <svg
         viewBox="0 0 100 100"
@@ -4540,8 +4544,6 @@ function RettungsdienstDemoInner({ session, onLogout }) {
           strokeLinejoin="round"
           fill="none"
         />
-        <rect x="45.5" y="10" width="9" height="20" rx="2" fill={darkMode ? "#FFFFFF" : "#1A2233"} />
-        <rect x="40" y="15.5" width="20" height="9" rx="2" fill={darkMode ? "#FFFFFF" : "#1A2233"} />
       </svg>
       <div style={{ width: "100%", maxWidth: 480, position: "relative", zIndex: 1 }}>
         {/* Einsatz- & REA-Timer — ganz oben, sofort verfügbar */}
@@ -4581,23 +4583,21 @@ function RettungsdienstDemoInner({ session, onLogout }) {
                 width: 42,
                 height: 42,
                 borderRadius: 12,
-                background: "linear-gradient(135deg, #FF6A3D, #FF8F6B)",
-                boxShadow: "0 4px 14px -4px #FF6A3D88",
+                background: "linear-gradient(135deg, #1A2740, #0B1220)",
+                boxShadow: "0 4px 14px -4px #00000088",
                 flexShrink: 0,
               }}
             >
-              {/* Dasselbe Motiv wie das echte Homescreen-App-Icon: Puls-Kurve + Kreuz-Akzent */}
+              {/* Dasselbe Motiv wie das echte Homescreen-App-Icon: Puls-Kurve, kein Kreuz mehr */}
               <svg width="30" height="30" viewBox="0 0 100 100" fill="none">
                 <path
                   d="M 8 58 L 26 58 L 33 43 L 41 68 L 49 33 L 57 63 L 63 50 L 70 58 L 92 58"
-                  stroke="#FFFFFF"
+                  stroke="#EF4444"
                   strokeWidth="8"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   fill="none"
                 />
-                <rect x="45.5" y="10" width="9" height="20" rx="2" fill="#FFFFFF" />
-                <rect x="40" y="15.5" width="20" height="9" rx="2" fill="#FFFFFF" />
               </svg>
             </div>
             <span
