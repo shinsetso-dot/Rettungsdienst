@@ -39,7 +39,7 @@ import {
 // NICHT automatisch bei jeder Änderung hochzählen — nur wenn der Nutzer
 // ausdrücklich sagt "das ist jetzt fertig". Wird unten im Footer gezeigt.
 // ═══════════════════════════════════════════════════════════════
-const APP_VERSION = "0.3.0";
+const APP_VERSION = "0.3.1";
 // Entwicklungsstufe — bleibt "Alpha", bis ausdrücklich auf "Beta"
 // umgestellt wird. NUR HIER ändern, wird überall automatisch übernommen.
 const APP_STUFE = "Alpha";
@@ -114,6 +114,9 @@ const CHANGELOG = {
   "0.3.0": [
     "Medikamenten-Zähler und Einsatzprotokoll sind jetzt verknüpft: eine Gabe über 'Jetzt gegeben — protokollieren' zählt automatisch mit, und ein gelöschter Protokoll-Eintrag nimmt den Zähler wieder zurück.",
     "Neue Live-Suche im Algorithmen-Tab — filtert die Liste schon ab 2 eingegebenen Zeichen.",
+  ],
+  "0.3.1": [
+    "Algorithmen-Suche deutlich präziser: Treffer nur noch am Wortanfang, nicht mehr irgendwo mitten im Wort (vorher matchte z. B. 'AC' fälschlich in 'Erwachsene'). Titeltext-Suche jetzt ab 5 Zeichen, K-/P-/V-Codes wie 'K12' funktionieren weiterhin sofort.",
   ],
 };
 
@@ -3308,6 +3311,30 @@ function algoSortVergleich(a, b) {
   if (ka !== kb) return ka - kb;
   if (na !== nb) return na - nb;
   return sa.localeCompare(sb);
+}
+
+// Präzise Suche: kein "irgendwo im Text enthalten" mehr (das lässt z. B.
+// "ac" fälschlich in "Erwachsene" matchen), sondern wortweise am Wortanfang —
+// sowohl im sichtbaren Titel als auch in der internen Kurz-ID (z. B. "acs"
+// für "Akutes Koronarsyndrom"). K-/P-/V-Codes (z. B. "K12") funktionieren
+// dabei unabhängig von der Mindestlänge, weil sie ein kontrolliertes,
+// eindeutiges Kürzel sind.
+function algoTreffer(a, sucheRoh) {
+  const suche = sucheRoh.trim().toLowerCase();
+  if (!suche) return true;
+
+  // Code in Klammern am Titelende, z. B. "(K12)" oder "(V3a)"
+  const codeMatch = a.titel.match(/\(([A-Za-z]\d+[a-z]?)\)\s*$/);
+  if (codeMatch && codeMatch[1].toLowerCase().startsWith(suche)) return true;
+
+  // Interne ID, wortweise nach Bindestrich getrennt (z. B. "atemnot-erwachsene")
+  const idWorte = a.id.replace(/^h-/, "").split("-");
+  if (idWorte.some((w) => w.startsWith(suche))) return true;
+
+  // Ab hier: normaler Titeltext — erst ab 5 Zeichen, dafür wortgenau
+  if (suche.length < 5) return false;
+  const titelWorte = a.titel.toLowerCase().split(/[^a-zäöüß0-9]+/);
+  return titelWorte.some((w) => w.startsWith(suche));
 }
 
 function sopBadgeFarbe(text, eigeneRegion) {
@@ -6731,11 +6758,7 @@ function RettungsdienstDemoInner({ session, onLogout }) {
             )}
 
             {[...(algoRegion === "hessen" ? ALGORITHMEN_HESSEN : ALGORITHMEN)]
-              .filter((a) => {
-                const suche = algoSuche.trim().toLowerCase();
-                if (suche.length < 2) return true; // Erst ab 2 Zeichen filtern
-                return a.titel.toLowerCase().includes(suche);
-              })
+              .filter((a) => algoTreffer(a, algoSuche))
               .sort((a, b) => {
               if (algoPinned) {
                 if (a.id === openAlgo) return -1;
@@ -7041,10 +7064,9 @@ function RettungsdienstDemoInner({ session, onLogout }) {
             })}
 
             {(() => {
-              const suche = algoSuche.trim().toLowerCase();
-              if (suche.length < 2) return null;
+              if (algoSuche.trim().length < 5) return null;
               const liste = algoRegion === "hessen" ? ALGORITHMEN_HESSEN : ALGORITHMEN;
-              const treffer = liste.filter((a) => a.titel.toLowerCase().includes(suche));
+              const treffer = liste.filter((a) => algoTreffer(a, algoSuche));
               if (treffer.length > 0) return null;
               return (
                 <div style={{ textAlign: "center", padding: "24px 12px", color: "var(--text-muted)" }}>
